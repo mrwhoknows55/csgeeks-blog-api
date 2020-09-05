@@ -1,18 +1,16 @@
 package com.mrwhoknows
 
 import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
 import com.fasterxml.jackson.databind.*
+import com.mrwhoknows.api.article
+import com.mrwhoknows.service.ArticleService
+import com.mrwhoknows.service.DatabaseFactory
 import io.ktor.jackson.*
 import io.ktor.features.*
+import io.ktor.routing.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
-@Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
     install(ContentNegotiation) {
         jackson {
@@ -20,14 +18,12 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
-    routing {
-        get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
+    DatabaseFactory.init()
 
-        get("/json/jackson") {
-            call.respond(mapOf("hello" to "world"))
-        }
+    val articleService = ArticleService()
+
+    install(Routing) {
+        article(articleService)
     }
 }
 
