@@ -62,6 +62,21 @@ class ArticleService {
         return getArticleById(key)
     }
 
+    suspend fun updateArticle(id: Int, article: Article): Article? {
+        dbQuery {
+            Articles.update({ Articles.id eq id }) {
+                it[author] = article.author
+                it[title] = article.title
+                it[thumbnail] = article.thumbnail
+                it[tags] = article.tags
+                it[description] = article.description
+                it[created] = System.currentTimeMillis()
+                it[content] = article.content
+            }
+        }
+        return getArticleById(id)
+    }
+
     suspend fun deleteArticle(id: Int): Boolean {
         return dbQuery {
             Articles.deleteWhere { Articles.id eq id } > 0

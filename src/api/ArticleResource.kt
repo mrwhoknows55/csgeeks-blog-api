@@ -95,39 +95,84 @@ fun Route.article(articleService: ArticleService) {
             }
         }
 
-        delete("{id}") {
+        put("/{id}") {
             val param = call.parameters["id"]
 
             try {
                 val id = Integer.parseInt(param)
-                val isDeleted = articleService.deleteArticle(id)
+                val article: Article? = call.receive()
 
-                if (isDeleted)
-                    call.respond(
-                        HttpStatusCode.OK,
-                        mapOf(
-                            "success" to true,
-                            "response" to "Article Deleted Successfully!"
+                if (article != null) {
+                    val articleResponse = articleService.updateArticle(id, article)
+
+                    if (articleResponse != null)
+                        call.respond(
+                            HttpStatusCode.OK,
+                            mapOf(
+                                "success" to true,
+                                "response" to "Article Updated Successfully!"
+                            )
                         )
-                    )
-                else
+                    else
+                        call.respond(
+                            HttpStatusCode.BadGateway,
+                            mapOf(
+                                "success" to false,
+                                "response" to "Server Error Try After Some Time"
+                            )
+                        )
+                } else {
                     call.respond(
                         HttpStatusCode.NotFound,
                         mapOf(
                             "success" to false,
-                            "response" to "Article Not Found!"
+                            "response" to "Article not found"
                         )
                     )
+                }
 
             } catch (e: NumberFormatException) {
                 call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf(
-                        "success" to false,
-                        "response" to "Error! Enter Correct Id "
-                    )
+                    mapOf("success" to false, "response" to "Error!")
                 )
             }
+        }
+    }
+
+    //  TODO make -> only one or more things can be updatable
+    delete("{id}") {
+        val param = call.parameters["id"]
+
+        try {
+            val id = Integer.parseInt(param)
+            val isDeleted = articleService.deleteArticle(id)
+
+            if (isDeleted)
+                call.respond(
+                    HttpStatusCode.OK,
+                    mapOf(
+                        "success" to true,
+                        "response" to "Article Deleted Successfully!"
+                    )
+                )
+            else
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    mapOf(
+                        "success" to false,
+                        "response" to "Article Not Found!"
+                    )
+                )
+
+        } catch (e: NumberFormatException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf(
+                    "success" to false,
+                    "response" to "Error! Enter Correct Id "
+                )
+            )
         }
     }
 }
