@@ -4,10 +4,7 @@ import com.mrwhoknows.model.Article
 import com.mrwhoknows.model.ArticleMeta
 import com.mrwhoknows.model.Articles
 import com.mrwhoknows.service.DatabaseFactory.dbQuery
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ArticleService {
@@ -63,5 +60,11 @@ class ArticleService {
             } get Articles.id)
         }
         return getArticleById(key)
+    }
+
+    suspend fun deleteArticle(id: Int): Boolean {
+        return dbQuery {
+            Articles.deleteWhere { Articles.id eq id } > 0
+        }
     }
 }

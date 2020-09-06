@@ -69,5 +69,22 @@ fun Route.article(articleService: ArticleService) {
                 call.respond(mapOf("success" to false, "response" to "Error! Please send all fields"))
             }
         }
+
+        delete("{id}") {
+            val param = call.parameters["id"]
+
+            try {
+                val id = Integer.parseInt(param)
+                val isDeleted = articleService.deleteArticle(id)
+
+                if (isDeleted)
+                    call.respond(mapOf("success" to true, "response" to "Article Deleted Successfully!"))
+                else
+                    call.respond(mapOf("success" to false, "response" to "Article Not Found!"))
+
+            } catch (e: NumberFormatException) {
+                call.respond(mapOf("success" to false, "response" to "Error! Enter Correct Id "))
+            }
+        }
     }
 }
