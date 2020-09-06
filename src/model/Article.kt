@@ -16,16 +16,15 @@ object Articles : Table() {
 }
 
 data class Article(
+    val id: Int? = null,
+    val title: String,
     val author: String,
-    val content: String,
-    val description: String,
-    val tags: String,
+    val created: Long? = null,
     val thumbnail: String,
-    val title: String
-) {
-    val created: Long? = null
-    val id: Int? = null
-}
+    val description: String,
+    val content: String,
+    val tags: String
+)
 
 data class ArticleMeta(
     val id: Int,
