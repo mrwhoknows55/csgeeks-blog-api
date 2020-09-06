@@ -3,6 +3,7 @@ package com.mrwhoknows.api
 import com.mrwhoknows.model.Article
 import com.mrwhoknows.service.ArticleService
 import io.ktor.application.*
+import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -10,7 +11,7 @@ import io.ktor.routing.*
 fun Route.article(articleService: ArticleService) {
 
     get("/") {
-        call.respond("Hello, this api is working! \uD83C\uDF89")
+        call.respond(HttpStatusCode.OK, "Hello, this api is working! \uD83C\uDF89")
     }
 
     route("/article") {
@@ -24,13 +25,15 @@ fun Route.article(articleService: ArticleService) {
 
                 if (article != null) {
                     call.respond(
+                        HttpStatusCode.OK,
                         mapOf(
                             "article" to article,
-                            "success" to false
+                            "success" to true
                         )
                     )
                 } else {
                     call.respond(
+                        HttpStatusCode.NotFound,
                         mapOf(
                             "success" to false,
                             "response" to "Article not found"
@@ -42,13 +45,17 @@ fun Route.article(articleService: ArticleService) {
                 if (param?.toLowerCase().equals("all")) {
                     val articleResponse = articleService.getAllArticles()
                     call.respond(
+                        HttpStatusCode.OK,
                         mapOf(
                             "articles" to articleResponse,
                             "success" to true
                         )
                     )
                 } else {
-                    call.respond(mapOf("success" to false, "response" to "Error!"))
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("success" to false, "response" to "Error!")
+                    )
                 }
             }
         }
@@ -60,13 +67,31 @@ fun Route.article(articleService: ArticleService) {
                 val articleResponse = articleService.saveArticle(article)
 
                 if (articleResponse != null)
-                    call.respond(mapOf("success" to true, "response" to "Article Created Successfully!"))
+                    call.respond(
+                        HttpStatusCode.Created,
+                        mapOf(
+                            "success" to true,
+                            "response" to "Article Created Successfully!"
+                        )
+                    )
                 else
-                    call.respond(mapOf("success" to false, "response" to "Server Error Try After Some Time"))
+                    call.respond(
+                        HttpStatusCode.BadGateway,
+                        mapOf(
+                            "success" to false,
+                            "response" to "Server Error Try After Some Time"
+                        )
+                    )
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                call.respond(mapOf("success" to false, "response" to "Error! Please send all fields"))
+                call.respond(
+                    HttpStatusCode.ExpectationFailed,
+                    mapOf(
+                        "success" to false,
+                        "response" to "Error! Please send all fields"
+                    )
+                )
             }
         }
 
@@ -78,12 +103,30 @@ fun Route.article(articleService: ArticleService) {
                 val isDeleted = articleService.deleteArticle(id)
 
                 if (isDeleted)
-                    call.respond(mapOf("success" to true, "response" to "Article Deleted Successfully!"))
+                    call.respond(
+                        HttpStatusCode.OK,
+                        mapOf(
+                            "success" to true,
+                            "response" to "Article Deleted Successfully!"
+                        )
+                    )
                 else
-                    call.respond(mapOf("success" to false, "response" to "Article Not Found!"))
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        mapOf(
+                            "success" to false,
+                            "response" to "Article Not Found!"
+                        )
+                    )
 
             } catch (e: NumberFormatException) {
-                call.respond(mapOf("success" to false, "response" to "Error! Enter Correct Id "))
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf(
+                        "success" to false,
+                        "response" to "Error! Enter Correct Id "
+                    )
+                )
             }
         }
     }
