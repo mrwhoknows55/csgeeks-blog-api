@@ -26,22 +26,23 @@ object DatabaseFactory {
 
     private fun insertDummyDataInTables() {
         Articles.insert {
-            it[title] = "dummy title 2"
-            it[tags] = "dummy,tags2"
-            it[author] = "dummy author2"
-            it[description] = "dummy description 2"
-            it[thumbnail] = "dummy thumb link2"
+            it[title] = Constants.DUMMY_TITLE
+            it[tags] = Constants.DUMMY_TAGS
+            it[author] = Constants.DUMMY_AUTHOR
+            it[description] = Constants.DUMMY_DESCRIPTION
+            it[thumbnail] = Constants.DUMMY_THUMBNAIL
+            it[content] = Constants.DUMMY_CONTENT
+
             it[created] = System.currentTimeMillis()
-            it[content] = "dummy content 2"
         }
     }
 
     private fun hikari(): HikariDataSource {
         val config = HikariConfig()
-        config.driverClassName = Constants.databaseDriver
-        config.jdbcUrl = Constants.databaseURI
-        config.username = Constants.databaseUser
-        config.password = Constants.databasePassword
+        config.driverClassName = Constants.DATABASE_DRIVER
+        config.jdbcUrl = Constants.DATABASE_URI
+        config.username = Constants.DATABASE_USER
+        config.password = Constants.DATABASE_PASSWORD
 
 //    TODO: understand this and  add/remove if any ...
 //    config.maximumPoolSize = 3
@@ -52,9 +53,6 @@ object DatabaseFactory {
         return HikariDataSource(config)
     }
 
-    // TODO: examine ->
-    suspend fun <T> dbQuery(
-        block: suspend () -> T
-    ): T =
+    suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction { block() }
 }

@@ -1,10 +1,10 @@
 package com.mrwhoknows.service
 
+import com.mrwhoknows.model.Article
 import com.mrwhoknows.model.ArticleMeta
 import com.mrwhoknows.model.Articles
 import com.mrwhoknows.service.DatabaseFactory.dbQuery
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ArticleService {
@@ -25,4 +25,61 @@ class ArticleService {
             description = row[Articles.description],
             created = row[Articles.created],
         )
+
+    suspend fun getArticleById(id: Int): Article? = dbQuery {
+        transaction {
+            Articles.select {
+                Articles.id eq id
+            }.mapNotNull { toArticle(it) }.singleOrNull()
+        }
+    }
+
+    private fun toArticle(row: ResultRow): Article =
+        Article(
+            title = row[Articles.title],
+            author = row[Articles.author],
+            content = row[Articles.content],
+            tags = row[Articles.tags],
+            description = row[Articles.description],
+            created = row[Articles.created],
+            id = row[Articles.id],
+            thumbnail = row[Articles.thumbnail]
+        )
+
+    suspend fun saveArticle(article: Article): Article? {
+        var key = 0
+        dbQuery {
+            key = (Articles.insert {
+                it[author] = article.author
+                it[title] = article.title
+                it[thumbnail] = article.thumbnail
+                it[tags] = article.tags
+                it[description] = article.description
+                it[created] = System.currentTimeMillis()
+                it[content] = article.content
+            } get Articles.id)
+        }
+        return getArticleById(key)
+    }
+
+    suspend fun updateArticle(id: Int, article: Article): Article? {
+        dbQuery {
+            Articles.update({ Articles.id eq id }) {
+                it[author] = article.author
+                it[title] = article.title
+                it[thumbnail] = article.thumbnail
+                it[tags] = article.tags
+                it[description] = article.description
+                it[created] = System.currentTimeMillis()
+                it[content] = article.content
+            }
+        }
+        return getArticleById(id)
+    }
+
+    suspend fun deleteArticle(id: Int): Boolean {
+        return dbQuery {
+            Articles.deleteWhere { Articles.id eq id } > 0
+        }
+    }
 }
