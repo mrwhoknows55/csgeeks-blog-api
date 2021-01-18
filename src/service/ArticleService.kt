@@ -50,28 +50,31 @@ class ArticleService {
         var key = 0
         dbQuery {
             key = (Articles.insert {
-                it[author] = article.author
-                it[title] = article.title
-                it[thumbnail] = article.thumbnail
-                it[tags] = article.tags
-                it[description] = article.description
+                it[author] = article.author!!
+                it[title] = article.title!!
+                it[thumbnail] = article.thumbnail!!
+                it[tags] = article.tags!!
+                it[description] = article.description!!
                 it[created] = System.currentTimeMillis()
-                it[content] = article.content
+                it[content] = article.content!!
             } get Articles.id)
         }
         return getArticleById(key)
     }
 
     suspend fun updateArticle(id: Int, article: Article): Article? {
+
+        val oldArticle = getArticleById(id)
+
         dbQuery {
             Articles.update({ Articles.id eq id }) {
-                it[author] = article.author
-                it[title] = article.title
-                it[thumbnail] = article.thumbnail
-                it[tags] = article.tags
-                it[description] = article.description
-                it[created] = System.currentTimeMillis()
-                it[content] = article.content
+                it[author] = article.author ?: oldArticle?.author!!
+                it[title] = article.title ?: oldArticle?.title!!
+                it[thumbnail] = article.thumbnail ?: oldArticle?.thumbnail!!
+                it[tags] = article.tags ?: oldArticle?.tags!!
+                it[description] = article.description ?: oldArticle?.description!!
+                it[created] = oldArticle?.created ?: System.currentTimeMillis()
+                it[content] = article.content ?: oldArticle?.content!!
             }
         }
         return getArticleById(id)
