@@ -8,9 +8,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.utils.io.*
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.Exception
 import java.lang.NumberFormatException
@@ -20,7 +18,7 @@ fun Route.article() {
         call.respond(HttpStatusCode.OK, "Hello, this api is working! \uD83C\uDF89")
     }
 
-    route("/posts") {
+    route("/articles") {
         get {
             val orderBy: String? = call.request.queryParameters["orderby"]
             val order: String? = call.request.queryParameters["order"]
@@ -72,7 +70,7 @@ fun Route.article() {
         }
     }
 
-    route("/post") {
+    route("/article") {
         get {
             try {
                 val id = call.request.queryParameters["id"]?.toInt()
@@ -116,6 +114,59 @@ fun Route.article() {
             }
 
             call.respond(HttpStatusCode.OK, "Article Added at ${id[ArticleTable.id]}")
+        }
+
+        put {
+            try {
+                val id = call.request.queryParameters["id"]?.toInt()
+                val newArticle = call.receive<Article>()
+
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Please Provide Correct ID")
+                } else {
+                    transaction {
+                        ArticleTable.update({ ArticleTable.id eq id }) {
+                            it[title] = newArticle.title
+                            it[content] = newArticle.content
+                            it[author] = newArticle.author
+                            it[description] = newArticle.description
+                            it[created] = System.currentTimeMillis()
+                            it[thumbnail] = newArticle.thumbnail
+                            it[tags] = newArticle.tags
+                            newArticle.vlink?.let { vlink ->
+                                it[ArticleTable.vlink] = vlink
+                            }
+                        }
+                    }
+                    call.respond(HttpStatusCode.OK, "Article Updated")
+                }
+            } catch (e: NumberFormatException) {
+                e.printStackTrace()
+                call.respond(HttpStatusCode.BadRequest, "Please Provide Correct ID")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                call.respond(HttpStatusCode.BadRequest, e.localizedMessage)
+            }
+        }
+
+        delete {
+            try {
+                val id = call.request.queryParameters["id"]?.toInt()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Please Provide Correct ID")
+                } else {
+                    transaction {
+                        ArticleTable.deleteWhere { ArticleTable.id eq id }
+                    }
+                    call.respond(HttpStatusCode.BadRequest, "Article Deleted!")
+                }
+            } catch (e: NumberFormatException) {
+                e.printStackTrace()
+                call.respond(HttpStatusCode.BadRequest, "Please Provide Correct ID")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                call.respond(HttpStatusCode.BadRequest, e.localizedMessage)
+            }
         }
     }
 }
