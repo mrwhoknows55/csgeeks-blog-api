@@ -1,0 +1,6 @@
+{
+  "name": "CS Geeks Blog Api: Ktor",
+  "description": "CS Geeks Blog Api: Ktor",
+  "image": "heroku/java",
+  "addons": [ "heroku-postgresql" ]
+}
