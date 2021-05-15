@@ -1,1 +1,1 @@
-web:    java -jar target/helloworld.jar
+web: ./build/install/csgeeks-blog-api/bin/csgeeks-blog-api

@@ -45,3 +45,7 @@ dependencies {
     //    Postgres
     implementation("org.postgresql:postgresql:$postgreDriverVersion")
 }
+
+tasks.create("stage") {
+    dependsOn("installDist")
+}
