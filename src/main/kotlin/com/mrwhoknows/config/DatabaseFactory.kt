@@ -22,13 +22,15 @@ object DatabaseFactory {
         }
     }
 
-    private const val DATABASE_USER = "postgres"
-    private const val DATABASE_PASSWORD = "password"
+    private val DATABASE_USER = System.getenv("DATABASE_USER") ?: "postgres"
+    private val DATABASE_PASSWORD = System.getenv("DATABASE_PASSWORD") ?: "password"
+    private val DATABASE_URL = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432/postgres"
+    private const val DATABASE_DRIVER = "org.postgresql.Driver"
 
     private fun hikariConfig(): HikariDataSource {
         val config = HikariConfig().apply {
-            driverClassName = "org.postgresql.Driver"
-            jdbcUrl = "jdbc:postgresql://localhost:5432/postgres"
+            driverClassName = DATABASE_DRIVER
+            jdbcUrl = DATABASE_URL
             maximumPoolSize = 3
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"
